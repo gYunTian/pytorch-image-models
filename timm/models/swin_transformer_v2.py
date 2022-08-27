@@ -18,6 +18,7 @@ from typing import Tuple, Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.functional import normalize
 import torch.utils.checkpoint as checkpoint
 
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
@@ -217,7 +218,10 @@ class WindowAttention(nn.Module):
         q, k, v = qkv.unbind(0)
 
         # cosine attention
-        k = F.normalize(k, dim=-1).transpose(-2, -1)
+        k = normalize(k, dim=-1)
+        k = k.transpose(-2, -1)
+        q = normalize(q, dim=-1)
+        
         attn = torch.matmul(q, k)
         #attn = (F.normalize(q, dim=-1) @ F.normalize(k, dim=-1).transpose(-2, -1))
         logit_scale = torch.clamp(self.logit_scale, max=math.log(1. / 0.01)).exp()
