@@ -217,7 +217,9 @@ class WindowAttention(nn.Module):
         q, k, v = qkv.unbind(0)
 
         # cosine attention
-        attn = (F.normalize(q, dim=-1) @ F.normalize(k, dim=-1).transpose(-2, -1))
+        k = F.normalize(k, dim=-1).transpose(-2, -1)
+        attn = torch.matmul(q, k)
+        #attn = (F.normalize(q, dim=-1) @ F.normalize(k, dim=-1).transpose(-2, -1))
         logit_scale = torch.clamp(self.logit_scale, max=math.log(1. / 0.01)).exp()
         attn = attn * logit_scale
 
